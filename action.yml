@@ -85,7 +85,10 @@ runs:
       env:
         VERSION: ${{ inputs.version }}
       run: |
-        curl -fsSL https://raw.githubusercontent.com/faultline-cli/faultline/main/install.sh | sh
+        INSTALL_SCRIPT="$(mktemp)"
+        curl -fsSL https://raw.githubusercontent.com/faultline-cli/faultline/main/install.sh -o "$INSTALL_SCRIPT"
+        sh "$INSTALL_SCRIPT"
+        rm -f "$INSTALL_SCRIPT"
 
     - name: Run faultline
       id: run

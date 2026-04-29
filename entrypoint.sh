@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -eu
 
 OUTDIR="${RUNNER_TEMP}/faultline"
