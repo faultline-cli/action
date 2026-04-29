@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -euo pipefail
 
 OUTDIR="${RUNNER_TEMP}/faultline"
 mkdir -p "$OUTDIR"

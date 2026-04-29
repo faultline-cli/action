@@ -83,11 +83,11 @@ runs:
     - name: Install faultline
       shell: bash
       env:
-        VERSION: ${{ inputs.version }}
+        FAULTLINE_VERSION: ${{ inputs.version }}
       run: |
         INSTALL_SCRIPT="$(mktemp)"
         curl -fsSL https://raw.githubusercontent.com/faultline-cli/faultline/main/install.sh -o "$INSTALL_SCRIPT"
-        sh "$INSTALL_SCRIPT"
+        bash "$INSTALL_SCRIPT"
         rm -f "$INSTALL_SCRIPT"
 
     - name: Run faultline
