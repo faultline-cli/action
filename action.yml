@@ -1,0 +1,125 @@
+name: 'Faultline'
+description: 'Diagnose CI failures with faultline — deterministic, evidence-backed analysis from your build log'
+author: 'faultline-cli'
+
+branding:
+  icon: 'search'
+  color: 'red'
+
+inputs:
+  log:
+    description: 'Path to the failing build log file'
+    required: true
+  version:
+    description: 'Faultline version to install (e.g. v0.4.3). Defaults to the latest release.'
+    required: false
+    default: ''
+  format:
+    description: "Output format for the human-readable summary: 'text' or 'markdown'"
+    required: false
+    default: 'markdown'
+  annotations:
+    description: 'Emit GitHub-native CI annotations alongside the summary'
+    required: false
+    default: 'false'
+  json:
+    description: 'Produce a machine-readable JSON analysis artifact'
+    required: false
+    default: 'true'
+  bayes:
+    description: 'Add Bayesian ranking hints to the JSON analysis output'
+    required: false
+    default: 'false'
+  workflow:
+    description: 'Produce a deterministic workflow.v1 handoff artifact via faultline workflow'
+    required: false
+    default: 'true'
+  workflow-mode:
+    description: "Mode passed to faultline workflow: 'agent' or 'human'"
+    required: false
+    default: 'agent'
+  fail-on-silent:
+    description: 'Exit non-zero if silent failure detectors fire'
+    required: false
+    default: 'false'
+  delta:
+    description: 'Enable experimental delta analysis against the last successful run on the same branch'
+    required: false
+    default: 'false'
+  github-token:
+    description: 'GitHub token used by the delta provider. Required when delta is true.'
+    required: false
+    default: ''
+  upload-artifacts:
+    description: 'Upload the JSON and markdown outputs as GitHub Actions workflow artifacts'
+    required: false
+    default: 'true'
+  artifact-retention-days:
+    description: 'Number of days to retain uploaded artifacts'
+    required: false
+    default: '30'
+  job-summary:
+    description: 'Append the markdown analysis to the GitHub Actions job summary'
+    required: false
+    default: 'true'
+
+outputs:
+  summary-markdown:
+    description: 'Path to the markdown analysis summary file'
+    value: ${{ steps.run.outputs.summary-markdown }}
+  analysis-json:
+    description: 'Path to the JSON analysis artifact (set when json input is true)'
+    value: ${{ steps.run.outputs.analysis-json }}
+  workflow-json:
+    description: 'Path to the workflow.v1 JSON artifact (set when workflow input is true)'
+    value: ${{ steps.run.outputs.workflow-json }}
+  failure-id:
+    description: 'The matched failure ID from the top diagnosis (empty when no match)'
+    value: ${{ steps.run.outputs.failure-id }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install faultline
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/faultline-cli/faultline/main/install.sh | sh
+
+    - name: Run faultline
+      id: run
+      shell: bash
+      env:
+        INPUT_LOG: ${{ inputs.log }}
+        INPUT_FORMAT: ${{ inputs.format }}
+        INPUT_ANNOTATIONS: ${{ inputs.annotations }}
+        INPUT_JSON: ${{ inputs.json }}
+        INPUT_BAYES: ${{ inputs.bayes }}
+        INPUT_WORKFLOW: ${{ inputs.workflow }}
+        INPUT_WORKFLOW_MODE: ${{ inputs.workflow-mode }}
+        INPUT_FAIL_ON_SILENT: ${{ inputs.fail-on-silent }}
+        INPUT_DELTA: ${{ inputs.delta }}
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: bash ${{ github.action_path }}/entrypoint.sh
+
+    - name: Write job summary
+      if: ${{ inputs.job-summary == 'true' }}
+      shell: bash
+      run: |
+        SUMMARY="${{ steps.run.outputs.summary-markdown }}"
+        if [ -f "$SUMMARY" ]; then
+          cat "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
+        fi
+
+    - name: Upload artifacts
+      if: ${{ inputs.upload-artifacts == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: faultline-analysis
+        retention-days: ${{ inputs.artifact-retention-days }}
+        if-no-files-found: ignore
+        path: |
+          ${{ runner.temp }}/faultline/faultline-summary.md
+          ${{ runner.temp }}/faultline/faultline-analysis.json
+          ${{ runner.temp }}/faultline/faultline-workflow.json
