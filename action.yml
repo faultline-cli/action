@@ -1,4 +1,4 @@
-name: 'Faultline'
+name: 'faultline'
 description: 'Diagnose CI failures with faultline — deterministic, evidence-backed analysis from your build log'
 author: 'faultline-cli'
 
