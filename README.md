@@ -7,7 +7,7 @@ Stop spelunking CI logs. Add one step to your failure path and get a determinist
 ```yaml
 - name: Diagnose failure
   if: failure()
-  uses: faultline-cli/action@v1
+  uses: faultline-cli/faultline-action@0.1.0
   with:
     log: build.log
 ```
@@ -58,7 +58,7 @@ jobs:
 
       - name: Diagnose failure
         if: failure()
-        uses: faultline-cli/action@v1
+        uses: faultline-cli/faultline-action@0.1.0
         with:
           log: build.log
 ```
@@ -68,7 +68,7 @@ jobs:
 ```yaml
 - name: Diagnose failure
   if: failure()
-  uses: faultline-cli/action@v1
+  uses: faultline-cli/faultline-action@0.1.0
   with:
     log: build.log
     version: v0.4.3
@@ -79,7 +79,7 @@ jobs:
 ```yaml
 - name: Diagnose failure
   if: failure()
-  uses: faultline-cli/action@v1
+  uses: faultline-cli/faultline-action@0.1.0
   with:
     log: build.log
     annotations: 'true'
@@ -91,7 +91,7 @@ jobs:
 - name: Diagnose failure
   if: failure()
   id: diagnosis
-  uses: faultline-cli/action@v1
+  uses: faultline-cli/faultline-action@0.1.0
   with:
     log: build.log
 
@@ -107,7 +107,7 @@ jobs:
 ```yaml
 - name: Diagnose failure
   if: failure()
-  uses: faultline-cli/action@v1
+  uses: faultline-cli/faultline-action@0.1.0
   with:
     log: build.log
     json: 'true'
@@ -120,7 +120,7 @@ jobs:
 
 ```yaml
 - name: Check for silent failures
-  uses: faultline-cli/action@v1
+  uses: faultline-cli/faultline-action@0.1.0
   with:
     log: build.log
     fail-on-silent: 'true'
@@ -131,7 +131,7 @@ jobs:
 ```yaml
 - name: Diagnose failure
   if: failure()
-  uses: faultline-cli/action@v1
+  uses: faultline-cli/faultline-action@0.1.0
   with:
     log: build.log
     workflow: 'false'
